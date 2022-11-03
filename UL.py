@@ -745,6 +745,69 @@ def neural_network(dataset):
     plt.clf()
     plt.close('images/MLP_after_KMEANS and LDA_Learning_curve.png')
 
+def kurtosis_ana(dataset):
+    import seaborn as sns
+    from scipy.stats import kurtosis
+    df1 = pd.read_csv(dataset, index_col=0, header=0)
+    df1.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df1.dropna(inplace=True)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    names = df1.columns.values
+    indexes = df1.index.values
+    x = df1.iloc[:, :-1]
+    y = df1.iloc[:, -1]
+    X = preprocessing.OneHotEncoder().fit_transform(x).toarray()
+
+
+    x_ica = FastICA(n_components=100).fit_transform(X)
+    print(kurtosis(np.mean(x_ica)))
+
+
+def PCA_eigen(dataset):
+    import numpy as np
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.model_selection import train_test_split
+
+    df1 = pd.read_csv(dataset, index_col=0, header=0)
+    df1.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df1.dropna(inplace=True)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    names = df1.columns.values
+    indexes = df1.index.values
+    x = df1.iloc[:, :-1]
+    y = df1.iloc[:, -1]
+    x = preprocessing.OneHotEncoder().fit_transform(x).toarray()
+    n_samples = x.shape[0]
+
+    pca = PCA()
+    pca.fit_transform(x)
+    PC_values = np.arange(pca.n_components_) + 1
+    plt.plot(PC_values, pca.explained_variance_ratio_, 'o-', linewidth=2, color='blue')
+    plt.title('Scree Plot')
+    plt.xlabel('Principal Component')
+    plt.ylabel('Variance Explained')
+
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.savefig('images/PCA_variance.png')
+    plt.clf()
+    plt.close('images/PCA_variance.png')
+
+    exp_var_pca = pca.explained_variance_ratio_
+    cum_sum_eigenvalues = np.cumsum(exp_var_pca)
+    plt.bar(range(0, len(exp_var_pca)), exp_var_pca, alpha=0.5, align='center', label='Individual explained variance')
+    plt.step(range(0, len(cum_sum_eigenvalues)), cum_sum_eigenvalues, where='mid',
+             label='Cumulative explained variance')
+    plt.ylabel('Explained variance ratio')
+    plt.xlabel('Principal component index')
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.savefig('images/PCA_cumsum.png')
+    plt.clf()
+    plt.close('images/PCA_cumsum.png')
 
 if __name__ == '__main__':
     # dataset = 'data2.csv'
@@ -787,4 +850,8 @@ if __name__ == '__main__':
     # clustering_for_reduced_features("LDA_data3_", LDA_df_d3, n_init)
 
     dataset = 'data2.csv'
-    neural_network(dataset)
+    kurtosis_ana(dataset)
+    # PCA_eigen(dataset)
+
+    # dataset = 'data2.csv'
+    # neural_network(dataset)
